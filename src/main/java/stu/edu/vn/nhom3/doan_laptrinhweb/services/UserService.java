@@ -21,7 +21,8 @@ public class UserService {
 
     public User getUserByName(String username)
     {
-        return userRepository.getUserByName(username);   }
+        return userRepository.getUserByName(username);
+    }
 
     public List<UserDTO> getAllUsers(){
         List<User> users=new ArrayList<>();
@@ -46,7 +47,6 @@ public class UserService {
         user.setUpdateDate(new Date());
         user.setRole_id(1);
         user.setUs_passwordHash("a99999");
-
         userRepository.save(user);
 
     }
