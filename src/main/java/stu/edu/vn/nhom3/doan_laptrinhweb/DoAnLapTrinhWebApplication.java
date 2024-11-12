@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.services.RoleService;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -15,6 +16,8 @@ public class DoAnLapTrinhWebApplication {
         ApplicationContext context= SpringApplication.run(DoAnLapTrinhWebApplication.class, args);
 //        UserRepository userRepository= context.getBean(UserRepository.class);
 //        userRepository.findAll().forEach(System.out::println);
+        RoleService roleService= context.getBean(RoleService.class);
+        roleService.addDefaultRole();
     }
 
 }

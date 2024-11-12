@@ -19,5 +19,4 @@ public class UserDTO {
     private Date updateBy;
     private boolean status;
     private int role_id;
-
 }

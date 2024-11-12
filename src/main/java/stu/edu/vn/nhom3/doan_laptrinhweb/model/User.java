@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table
@@ -20,22 +19,22 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false,columnDefinition = "varchar(100)")
+    @Column(columnDefinition = "varchar(100)")
     private String name;
 
-    @Column(nullable = false,columnDefinition = "varchar(100)")
+    @Column(columnDefinition = "varchar(100)")
     private String email;
 
-    @Column(nullable = false,columnDefinition = "varchar(200)")
-    private String us_passwordHash;
+    @Column(columnDefinition = "varchar(200)")
+    private String passwordHash;
 
-    @Column(nullable = false)
+    @Column()
     private Date createBy;
 
-    @Column(nullable = false)
+    @Column()
     private Date updateDate;
 
-    @Column(nullable = false,columnDefinition = "boolean default true")
+    @Column(columnDefinition = "boolean default true")
     private boolean status;
 
     @Column

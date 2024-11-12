@@ -15,10 +15,10 @@ import java.util.List;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int role_id;
+    private int id;
 
     @Column
-    private String role_name;
+    private String name;
 
     @OneToMany(mappedBy = "role")
     private List<User> users;

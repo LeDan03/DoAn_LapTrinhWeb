@@ -1,6 +1,5 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
-import jakarta.transaction.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UserDTO;
@@ -8,7 +7,6 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +15,6 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
 
     public User getUserByName(String username)
     {
@@ -38,16 +35,16 @@ public class UserService {
         return userDTOs;
     }
 
-    public void saveUser() {
-        User user=new User();
-        user.setName("aaa");
-        user.setEmail("bbb");
-        user.setCreateBy(new Date());
-        user.setStatus(true);
-        user.setUpdateDate(new Date());
-        user.setRole_id(1);
-        user.setUs_passwordHash("a99999");
+    public void saveUser(User user) {
         userRepository.save(user);
-
     }
+
+    public boolean isValidUserLogin(String username, String password) {
+        if(userRepository.getUserByName(username)!=null)
+            if(userRepository.getUserByName(username).getPasswordHash().equals(password))
+                return true;
+        return false;
+    }
+
+
 }
