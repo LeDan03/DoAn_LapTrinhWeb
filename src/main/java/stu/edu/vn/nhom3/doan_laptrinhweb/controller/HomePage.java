@@ -44,7 +44,7 @@ public class HomePage {
         ModelAndView mav = new ModelAndView("login");
         String username = params.get("username").toString();
         String password = params.get("password").toString();
-        if(userService.isValidUserLogin(username,new BCryptPasswordEncoder().encode(password)))
+        if(userService.isValidUserLogin(username,password))
             mav.setViewName("index");
         return mav;
     }
