@@ -14,8 +14,6 @@ public class DoAnLapTrinhWebApplication {
     public static void main(String[] args) {
 
         ApplicationContext context= SpringApplication.run(DoAnLapTrinhWebApplication.class, args);
-//        UserRepository userRepository= context.getBean(UserRepository.class);
-//        userRepository.findAll().forEach(System.out::println);
         RoleService roleService= context.getBean(RoleService.class);
         roleService.addDefaultRole();
     }

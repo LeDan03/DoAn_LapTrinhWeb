@@ -35,10 +35,10 @@ public class User implements Serializable {
     private Date updateDate;
 
     @Column(columnDefinition = "boolean default true")
-    private boolean status;
+    private boolean status=true;
 
     @Column
-    private int role_id;
+    private int role_id=2;
 
 //    @OneToMany(mappedBy = "us")
 //    private List<Orders> orders;
