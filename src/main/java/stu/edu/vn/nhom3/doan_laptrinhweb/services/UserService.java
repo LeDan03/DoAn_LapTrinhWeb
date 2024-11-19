@@ -1,18 +1,14 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +27,13 @@ public class UserService {
     {
         return userRepository.getUserByName(username);
     }
-    public UserDTO getUserDTOByName(String username)
+    public RegisterUserDTO getUserDTOByName(String username)
     {
         User user = getUserByName(username);
         if(user != null)
         {
-            UserDTO userDTO = new UserDTO();
-            userDTO=UserDTO.builder()
+            RegisterUserDTO userDTO = new RegisterUserDTO();
+            userDTO= RegisterUserDTO.builder()
                     .id(user.getId())
                     .name(user.getName())
                     .email(user.getEmail())
@@ -48,12 +44,12 @@ public class UserService {
         }
         return null;
     }
-    public List<UserDTO> getAllUsers(){
+    public List<RegisterUserDTO> getAllUsers(){
         List<User> users=new ArrayList<>();
         users=userRepository.findAll();
-        List<UserDTO> userDTOs=new ArrayList<>();
+        List<RegisterUserDTO> userDTOs=new ArrayList<>();
         userDTOs=users.stream().map(user -> {
-            return UserDTO.builder()
+            return RegisterUserDTO.builder()
                     .id(user.getId())
                     .name(user.getName())
                     .email(user.getEmail())
@@ -68,8 +64,6 @@ public class UserService {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole_id(role_id);
-        user.setCreateBy(new Date());
-        user.setUpdateDate(new Date());
         return user;
     }
 
@@ -97,13 +91,13 @@ public class UserService {
     }
 
     public boolean isAdmin(String username) {
-        UserDTO userDTO=getUserDTOByName(username);
+        RegisterUserDTO userDTO=getUserDTOByName(username);
         if(userDTO.getRole_id()== roleService.getAdminRole())
             return true;
         return false;
     }
 
-    public ResponseEntity<String> updateUser(String oldName,UserDTO userDTO) {
+    public ResponseEntity<String> updateUser(String oldName, RegisterUserDTO userDTO) {
         if(userRepository.getUserByName(oldName)!=null)
         {
             userRepository.updateUserByName(oldName

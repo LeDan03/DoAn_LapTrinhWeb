@@ -2,18 +2,23 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table
 @Getter
 @Setter
 @Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,14 +30,8 @@ public class User implements Serializable {
     @Column(columnDefinition = "varchar(100)")
     private String email;
 
-    @Column(columnDefinition = "varchar(200)")
+    @Column(columnDefinition = "varchar(400)")
     private String passwordHash;
-
-    @Column()
-    private Date createBy;
-
-    @Column()
-    private Date updateDate;
 
     @Column(columnDefinition = "boolean default true")
     private boolean status=true;
@@ -40,14 +39,43 @@ public class User implements Serializable {
     @Column
     private int role_id=2;
 
-//    @OneToMany(mappedBy = "us")
-//    private List<Orders> orders;
-//
-//    @OneToMany(mappedBy = "user")
-//    private List<Comment> comment;
 
     @ManyToOne
     @JoinColumn(name = "role_id",insertable = false, updatable = false)
     private Role role;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return getPasswordHash();
+    }
+
+    @Override
+    public String getUsername() {
+        return getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

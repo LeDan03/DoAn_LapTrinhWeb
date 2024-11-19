@@ -3,7 +3,7 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.PasswordService;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.UserService;
@@ -20,13 +20,13 @@ public class UserController {
     PasswordService passwordService;
 
     @GetMapping("/dangnhap")
-    public ResponseEntity<UserDTO> login(@RequestParam(value = "username") String username, @RequestParam(value = "password") String password)
+    public ResponseEntity<RegisterUserDTO> login(@RequestParam(value = "username") String username, @RequestParam(value = "password") String password)
     {
-        UserDTO userDTO = userService.getUserDTOByName(username);
+        RegisterUserDTO userDTO = userService.getUserDTOByName(username);
         if(userDTO!=null)
         {
             if(userDTO.isStatus()){
-                if(passwordService.passwordEncoder().matches(password,userDTO.getPassword()))
+                if(passwordService.passwordEncoders().matches(password,userDTO.getPassword()))
                     return ResponseEntity.ok(userDTO);//tra ve 200 va userDTO
                 else
                     return ResponseEntity.notFound().build();
@@ -53,7 +53,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<String> updateUser(@RequestParam Map<String,Object> params)
     {
-        UserDTO userDTO = userService.getUserDTOByName( (String)params.get("oldName"));
+        RegisterUserDTO userDTO = userService.getUserDTOByName( (String)params.get("oldName"));
         userDTO.setName((String)params.get("newName"));
         userDTO.setPassword((String)params.get("newPassword"));
         userDTO.setEmail((String)params.get("newEmail"));
