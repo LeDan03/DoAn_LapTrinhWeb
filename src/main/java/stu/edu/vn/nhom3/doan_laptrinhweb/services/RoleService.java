@@ -17,10 +17,10 @@ public class RoleService {
         List<Role> roles = roleRepository.findAll();
         if(roles.size()==0) {
             Role roleAdmin = new Role();
-            roleAdmin.setName("admin");
+            roleAdmin.setName("ADMIN");
             roleRepository.save(roleAdmin);
             Role roleUser = new Role();
-            roleUser.setName("user");
+            roleUser.setName("USER");
             roleRepository.save(roleUser);
         }
     }

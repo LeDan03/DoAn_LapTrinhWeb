@@ -1,6 +1,5 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.configs;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,16 +13,22 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 
 @Configuration
 public class ApplicationConfiguration {
-    @Autowired
     private final UserRepository userRepository;
 
     public ApplicationConfiguration(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    //
+//    @Bean
+//    UserDetailsService userDetailsService() {
+//        return username -> userRepository.findByEmail(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+//    }
+
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
+        return username -> userRepository.findByName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

@@ -34,10 +34,10 @@ public class User implements Serializable, UserDetails {
     private String passwordHash;
 
     @Column(columnDefinition = "boolean default true")
-    private boolean status=true;
+    private boolean status;
 
     @Column
-    private int role_id=2;
+    private int role_id;
 
 
     @ManyToOne
@@ -56,7 +56,7 @@ public class User implements Serializable, UserDetails {
 
     @Override
     public String getUsername() {
-        return getEmail();
+        return getName();
     }
 
     @Override

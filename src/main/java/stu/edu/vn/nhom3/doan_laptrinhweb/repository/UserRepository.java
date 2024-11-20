@@ -16,11 +16,12 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer>, CrudRepository<User, Integer> {
     User getUserByName(String name);
 
-    @Transactional
     @Modifying
     @Query("UPDATE User u set u.name=:newName, u.passwordHash=:passwordHash, u.email=:email where u.name=:oldName")
     void updateUserByName(@Param("oldName")String oldName, @Param("newName")String newName
                          ,@Param("passwordHash")String passwordHash, @Param("email")String email);
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByName(String name);
 }
