@@ -97,15 +97,16 @@ public class UserService {
         return false;
     }
 
-    public ResponseEntity<String> updateUser(String oldName, RegisterUserDTO userDTO) {
+    public void updateUser(String oldName, User user) {
         if(userRepository.getUserByName(oldName)!=null)
         {
             userRepository.updateUserByName(oldName
-                                            ,userDTO.getName()
-                                            ,passwordEncoder.encode(userDTO.getPassword())
-                                            ,userDTO.getEmail());
-            return ResponseEntity.ok("UPDATE USER SUCCESSFUL");
+                                            ,user.getName()
+                                            ,passwordEncoder.encode(user.getPassword())
+                                            ,user.getEmail());
+            ResponseEntity.ok("UPDATE USER SUCCESSFUL");
+            return;
         }
-        return ResponseEntity.notFound().build();
+        ResponseEntity.notFound().build();
     }
 }

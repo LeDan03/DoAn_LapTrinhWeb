@@ -4,15 +4,13 @@ import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class RegisterUserDTO {
-    private int id;
-    private String name;
+public class UpdateUserDTO {
+
+    private String oldName;
+    private String newName;
     private String password;
     private String email;
-    private int role_id;
-    private boolean status;
-
 }

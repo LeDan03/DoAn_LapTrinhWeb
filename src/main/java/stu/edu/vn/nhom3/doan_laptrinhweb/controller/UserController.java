@@ -50,13 +50,13 @@ public class UserController {
         return "Registration failed";
     }
 
-    @PutMapping
-    public ResponseEntity<String> updateUser(@RequestParam Map<String,Object> params)
-    {
-        RegisterUserDTO userDTO = userService.getUserDTOByName( (String)params.get("oldName"));
-        userDTO.setName((String)params.get("newName"));
-        userDTO.setPassword((String)params.get("newPassword"));
-        userDTO.setEmail((String)params.get("newEmail"));
-        return userService.updateUser((String) params.get("oldName"),userDTO);
-    }
+//    @PutMapping
+//    public ResponseEntity<String> updateUser(@RequestParam Map<String,Object> params)
+//    {
+//        RegisterUserDTO userDTO = userService.getUserDTOByName( (String)params.get("oldName"));
+//        userDTO.setName((String)params.get("newName"));
+//        userDTO.setPassword((String)params.get("newPassword"));
+//        userDTO.setEmail((String)params.get("newEmail"));
+//        return userService.updateUser((String) params.get("oldName"),userDTO);
+//    }
 }

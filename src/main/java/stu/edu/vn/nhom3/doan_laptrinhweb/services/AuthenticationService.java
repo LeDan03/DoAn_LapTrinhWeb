@@ -38,11 +38,9 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
-    //
     public User authenticate(LoginUserDTO input) {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            // input.getEmail(),
                             input.getName(),
                             input.getPassword()
                     )
