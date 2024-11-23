@@ -15,6 +15,7 @@ import java.util.Optional;
 @Transactional
 public interface UserRepository extends JpaRepository<User, Integer>, CrudRepository<User, Integer> {
     User getUserByName(String name);
+    User getUserById(int id);
 
     @Modifying
     @Query("UPDATE User u set u.name=:newName, u.passwordHash=:passwordHash, u.email=:email where u.name=:oldName")

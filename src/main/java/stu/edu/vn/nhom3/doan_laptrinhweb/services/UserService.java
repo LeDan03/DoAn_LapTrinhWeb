@@ -27,6 +27,9 @@ public class UserService {
     {
         return userRepository.getUserByName(username);
     }
+
+    public User getUserById(int id){ return userRepository.getUserById(id); }
+
     public RegisterUserDTO getUserDTOByName(String username)
     {
         User user = getUserByName(username);
