@@ -58,6 +58,7 @@ public class AuthenticationController {
         loginResponse.setToken(jwtToken);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
         loginResponse.setUsername(authenticatedUser.getUsername());
+        loginResponse.setStatus(authenticatedUser.isStatus());
         loginResponse.setRoleId(authenticatedUser.getRole_id());
         Authentication authentication = new UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities());
         return ResponseEntity.ok(loginResponse);
