@@ -17,7 +17,7 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.response.LoginResponse;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.AuthenticationService;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.JwtService;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.UserService;
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping(value = "/auth")
 public class AuthenticationController {
@@ -57,6 +57,8 @@ public class AuthenticationController {
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
+        loginResponse.setUsername(authenticatedUser.getUsername());
+        loginResponse.setRoleId(authenticatedUser.getRole_id());
         Authentication authentication = new UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities());
         return ResponseEntity.ok(loginResponse);
     }

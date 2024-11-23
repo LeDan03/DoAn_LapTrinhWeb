@@ -10,7 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginResponse {
+    private String username;
+    private int roleId;
     private String token;
     private long expiresIn;
-
 }
