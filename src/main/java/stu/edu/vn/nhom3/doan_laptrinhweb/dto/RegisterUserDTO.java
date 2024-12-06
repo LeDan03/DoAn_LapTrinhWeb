@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class RegisterUserDTO {
     private int id;
-    private String name;
+    private String fullName;
     private String password;
     private String email;
     private int role_id;

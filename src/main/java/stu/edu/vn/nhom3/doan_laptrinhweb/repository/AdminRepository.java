@@ -12,8 +12,7 @@ public interface AdminRepository extends JpaRepository<User,Integer> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE User u set u.status=:status where u.name=:username" )
-    void updateUserStatusByName(@Param("status") boolean status, @Param("username") String username);
+    @Query("UPDATE User u set u.status=:status where u.email=:email" )
+    void updateUserStatusByEmail(@Param("status") boolean status, @Param("email") String email);
 
-    User findByName(String name);
 }

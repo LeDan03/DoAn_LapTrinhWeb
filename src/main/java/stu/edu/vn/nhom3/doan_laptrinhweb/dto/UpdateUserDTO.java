@@ -9,8 +9,7 @@ import lombok.*;
 @Setter
 public class UpdateUserDTO {
 
-    private String oldName;
-    private String newName;
-    private String password;
+    private String newFullName;
+    private String newPassword;
     private String email;
 }

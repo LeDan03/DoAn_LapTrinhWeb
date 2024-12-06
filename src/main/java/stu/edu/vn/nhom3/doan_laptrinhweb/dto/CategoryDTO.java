@@ -4,12 +4,11 @@ import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@Builder
 @Getter
 @Setter
-public class LoginUserDTO {
+@Builder
+public class CategoryDTO {
 
-    private String email;
-    private String password;
+    private String name;
+    private String code;
 }

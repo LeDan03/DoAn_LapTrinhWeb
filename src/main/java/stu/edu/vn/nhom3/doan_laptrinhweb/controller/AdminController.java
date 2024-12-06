@@ -1,15 +1,27 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import stu.edu.vn.nhom3.doan_laptrinhweb.configs.JwtAuthenticationFilter;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Image;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
-import stu.edu.vn.nhom3.doan_laptrinhweb.services.AdminService;
-import stu.edu.vn.nhom3.doan_laptrinhweb.services.UserService;
+import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/admin")
 public class AdminController {
@@ -17,21 +29,118 @@ public class AdminController {
     AdminService adminService;
 
     @Autowired
-    UserService userService;
+    private CategoryService categoryService;
 
-    @DeleteMapping(value = "/deleteuser")
-    public ResponseEntity<String> disableUser(String username) {
-        return ResponseEntity.ok( adminService.disableUser(username,userService.getUserDTOByName(username)));
-    }
-    @GetMapping(value = "/getall")
-    public ResponseEntity<List<RegisterUserDTO>> getAllUsers() {
-        List<RegisterUserDTO> userDTOList = userService.getAllUsers();
-        return ResponseEntity.ok(userDTOList);
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    CloudinaryService cloudinaryService;
+
+    @Autowired
+    ImageService imageService;
+
+
+
+    @PutMapping(value = "/disableUser")
+    public ResponseEntity<User> disableUser(@Param("email") String email) {
+        return adminService.disableUser(email);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    @GetMapping(value = "/getAllUser")
+    public ResponseEntity<List<RegisterUserDTO>> getAllUser() {
+        return ResponseEntity.ok(adminService.getAllUser());
+    }
+
+    @PostMapping(value = "/addCategory")
+    public ResponseEntity<Category> addNewCategory(@RequestBody CategoryDTO categoryDTO) {
+        Category category = new Category();
+        category.setName(categoryDTO.getName());
+        category.setCode(categoryDTO.getCode());
+        boolean result = categoryService.addCategory(category);
+        if (result)
+            return ResponseEntity.ok(category);
+        else
+            return ResponseEntity.badRequest().build();
+    }
+
+    @PutMapping(value = "/updateCategory/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable("id") int id,@RequestBody CategoryDTO categoryDTO) {
+        categoryService.updateCategory(id, categoryDTO);
+        return ResponseEntity.ok().body(null);
+    }
+
+    @DeleteMapping(value = "/deleteCategory/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable("id") int id) {
+        Logger logger = Logger.getLogger(this.getClass().getName());
+        logger.info("Delete Category");
+        boolean result = categoryService.deleteCategory(id);
+        if(result)
+            return ResponseEntity.ok("Da xoa Category co id: "+id);
+        else
+            return ResponseEntity.badRequest().body("Không xóa được Category có id: "+id);
+    }
+
+    @GetMapping(value = "/getAllCategory")
+    public ResponseEntity<List<CategoryDTO>> getAllCategory()
+    {
+        return ResponseEntity.ok().body(adminService.getAllCategory());
+    }
+
+    @PostMapping(value = "/addProduct")
+    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO productDTO, @RequestParam("files") List<MultipartFile> files) {
+        Product product = new Product();
+        Logger logger = Logger.getLogger(this.getClass().getName());
+        logger.info("Add Product");
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setTheme(productDTO.getTheme());
+        product.setUnit(productDTO.getUnit());
+        product.setCate_id(productDTO.getCategory_id());
+        logger.info("Trước khi add product");
+        Product result = productService.addProduct(product);
+
+        try {
+            for(int i = 0; i<files.size(); i++)
+            {
+
+                logger.info("Đã vào Try");
+                String fileUrl = cloudinaryService.uploadFile(files.get(i));
+                imageService.addNewImage(result.getId(),fileUrl);
+                logger.info("Đã lưu image");
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+    }
+    @DeleteMapping(value = "/deleteProduct/{id}")
+    public void deleteProduct(@PathVariable("id") int id) {
+        productService.deleteProduct(id);
+        ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "/updateProduct/{id}")
+    public void updateProduct(@PathVariable("id") int id, @RequestBody ProductDTO productDTO) {
+        productService.updateProduct(id, productDTO);
+        ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/getAllProduct")
+    public ResponseEntity<List<ProductDTO>> getAllProduct()
+    {
+        return ResponseEntity.ok().body(adminService.getAllProduct());
+    }
+
+    @PostMapping(value = "/upload")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            String fileUrl = cloudinaryService.uploadFile(file);
+            return ResponseEntity.ok(fileUrl);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
+        }
     }
 }

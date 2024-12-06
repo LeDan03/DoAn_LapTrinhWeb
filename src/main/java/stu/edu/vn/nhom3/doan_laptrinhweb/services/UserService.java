@@ -1,10 +1,13 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 
@@ -17,56 +20,52 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    PasswordService   passwordService;
     RoleService   roleService;
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    public User getUserByName(String username)
+    public User getUserByEmail(String email)
     {
-        return userRepository.getUserByName(username);
+        return userRepository.getUserByEmail(email);
     }
-
-    public User getUserById(int id){ return userRepository.getUserById(id); }
-
-    public RegisterUserDTO getUserDTOByName(String username)
+    public RegisterUserDTO getUserDTOByEmail(String email)
     {
-        User user = getUserByName(username);
+        User user = getUserByEmail(email);
         if(user != null)
         {
             RegisterUserDTO userDTO = new RegisterUserDTO();
             userDTO= RegisterUserDTO.builder()
                     .id(user.getId())
-                    .name(user.getName())
                     .email(user.getEmail())
-                    .password(user.getPasswordHash())
                     .status(user.isStatus())
+                    .fullName(user.getFullName())
                     .build();
             return userDTO;
         }
         return null;
     }
-    public List<RegisterUserDTO> getAllUsers(){
-        List<User> users=new ArrayList<>();
-        users=userRepository.findAll();
-        List<RegisterUserDTO> userDTOs=new ArrayList<>();
-        userDTOs=users.stream().map(user -> {
-            return RegisterUserDTO.builder()
-                    .id(user.getId())
-                    .name(user.getName())
-                    .email(user.getEmail())
-                    .build();
-        }).collect(Collectors.toList());
-        return userDTOs;
+    @Transactional
+    public User updateUserByEmail(UpdateUserDTO userDTO)
+    {
+        User user = userRepository.getUserByEmail(userDTO.getEmail());
+        if (user != null){
+            userRepository.updateUserByEmail(userDTO.getEmail(),
+                    userDTO.getNewFullName(),
+                    passwordEncoder.encode(userDTO.getNewPassword()));
+            user = userRepository.getUserByEmail(userDTO.getEmail());
+        }
+        return  user;
     }
 
-    public User putInfoInUser(String username, String email ,String password,int role_id) {
+
+
+
+    public User putInfoInUser(String email ,String password,int role_id, String fullName) {
         User user=new User();
-        user.setName(username);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole_id(role_id);
+        user.setFullName(fullName);
         return user;
     }
 
@@ -74,42 +73,23 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public boolean isValidUserLogin(String username, String password) {
-        if(userRepository.getUserByName(username)!=null)
-            if(passwordEncoder.matches(password,userRepository.getUserByName(username).getPasswordHash()))
+    public boolean isValidUserLogin(String email, String password) {
+        if(userRepository.getUserByEmail(email)!=null)
+            if(passwordEncoder.matches(password,userRepository.getUserByEmail(email).getPasswordHash()))
                 return true;
         return false;
     }
 
-    public boolean isValidUserRegister(String username, String password) {
-        User user= userRepository.getUserByName(username);
+    public boolean isValidUserRegister(String email, String password) {
+        User user= userRepository.getUserByEmail(email);
         if(user!=null)
             return false;
         else{
-            if (username.length()<8||password.length()<8) {
+            if (password.length()<8) {
                 return false;
             }
         }
         return true;
     }
 
-    public boolean isAdmin(String username) {
-        RegisterUserDTO userDTO=getUserDTOByName(username);
-        if(userDTO.getRole_id()== roleService.getAdminRole())
-            return true;
-        return false;
-    }
-
-    public void updateUser(String oldName, User user) {
-        if(userRepository.getUserByName(oldName)!=null)
-        {
-            userRepository.updateUserByName(oldName
-                                            ,user.getName()
-                                            ,passwordEncoder.encode(user.getPassword())
-                                            ,user.getEmail());
-            ResponseEntity.ok("UPDATE USER SUCCESSFUL");
-            return;
-        }
-        ResponseEntity.notFound().build();
-    }
 }

@@ -15,7 +15,7 @@ public class RoleService {
 
     public void addDefaultRole(){
         List<Role> roles = roleRepository.findAll();
-        if(roles.size()==0) {
+        if(roles.isEmpty()) {
             Role roleAdmin = new Role();
             roleAdmin.setName("ADMIN");
             roleRepository.save(roleAdmin);
@@ -30,7 +30,7 @@ public class RoleService {
     }
     public int getAdminRole()
     {
-        Role roleAdmin = roleRepository.findByName("admin");
+        Role roleAdmin = roleRepository.findByName("ADMIN");
         return roleAdmin.getId();
     }
 }

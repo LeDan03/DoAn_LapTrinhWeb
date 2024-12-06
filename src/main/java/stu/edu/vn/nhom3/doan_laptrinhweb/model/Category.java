@@ -12,14 +12,16 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
+
+    @Column(nullable = false, length = 200)
     private String name;
+    @Column(columnDefinition = "char(150)")
+    private String code;
 
-    @OneToMany(mappedBy = "role")
-    private List<User> users;
-
+    @OneToMany(mappedBy = "category")
+    private List<Product> products;
 }

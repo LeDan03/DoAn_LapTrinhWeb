@@ -10,9 +10,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginResponse {
-    private String username;
+    private String email;
     private int roleId;
-    private boolean status;
     private String token;
     private long expiresIn;
+    private boolean status;
 }

@@ -56,6 +56,7 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
+        //String role = authentication.getAuthorities().stream().map(r -> r.getAuthority()).collect(Collectors.toSet()).iterator().next();
         return Jwts
                 .builder()
                 .claims(extraClaims)
@@ -92,7 +93,7 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    public boolean isDuplicateUsername(String username) {
-        return userRepository.getUserByName(username)!=null;
+    public boolean isDuplicateEmail(String email) {
+        return userRepository.getUserByEmail(email) != null;
     }
 }

@@ -19,16 +19,9 @@ public class ApplicationConfiguration {
         this.userRepository = userRepository;
     }
 
-    //
-//    @Bean
-//    UserDetailsService userDetailsService() {
-//        return username -> userRepository.findByEmail(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//    }
-
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> userRepository.findByName(username)
+        return username -> userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
@@ -51,4 +44,5 @@ public class ApplicationConfiguration {
 
         return authProvider;
     }
+
 }
