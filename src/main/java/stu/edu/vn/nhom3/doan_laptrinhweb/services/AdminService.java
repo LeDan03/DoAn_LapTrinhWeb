@@ -61,6 +61,10 @@ public class AdminService {
                     .email(user.getEmail())
                     .fullName(user.getFullName())
                     .role_id(user.getRole_id())
+<<<<<<< HEAD
+=======
+                    .status(user.isStatus())
+>>>>>>> 87c04e61223943786b71578c4f23fd9f4ac8df86
                     .build();
         }).collect(Collectors.toList());
         return userDTOs;
