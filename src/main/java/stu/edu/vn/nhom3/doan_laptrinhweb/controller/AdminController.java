@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@Slf4j
+@CrossOrigin("*")
+//@Slf4j
 @RestController
 @RequestMapping(value = "/admin")
 public class AdminController {
@@ -42,8 +43,8 @@ public class AdminController {
 
 
 
-    @PutMapping(value = "/disableUser")
-    public ResponseEntity<User> disableUser(@Param("email") String email) {
+    @PutMapping(value = "/disableUser/{email}")
+    public ResponseEntity<User> disableUser(@PathVariable("email") String email) {
         return adminService.disableUser(email);
     }
 
