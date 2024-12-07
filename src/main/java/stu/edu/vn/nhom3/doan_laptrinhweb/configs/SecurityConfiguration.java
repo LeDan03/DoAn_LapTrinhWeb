@@ -61,16 +61,12 @@ public class SecurityConfiguration {
 //
 //        return source;
         CorsConfiguration configuration = new CorsConfiguration();
-<<<<<<< HEAD
-
         configuration.setAllowedOrigins(List.of("http://localhost:8080"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
-=======
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));  // Frontend React
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
->>>>>>> 87c04e61223943786b71578c4f23fd9f4ac8df86
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
