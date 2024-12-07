@@ -1,5 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class AdminService {
                     .id(user.getId())
                     .email(user.getEmail())
                     .fullName(user.getFullName())
+                    .role_id(user.getRole_id())
                     .build();
         }).collect(Collectors.toList());
         return userDTOs;
@@ -91,5 +93,8 @@ public class AdminService {
                     .build();
         }).collect(Collectors.toList());
         return productDTOS;
+    }
+    public User getUserById(int id) {
+        return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
     }
 }

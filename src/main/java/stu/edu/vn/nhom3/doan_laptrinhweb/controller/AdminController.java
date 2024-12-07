@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+@CrossOrigin("*")
 @Slf4j
 @RestController
 @RequestMapping(value = "/admin")
@@ -40,7 +41,11 @@ public class AdminController {
     @Autowired
     ImageService imageService;
 
-
+    @GetMapping(value = "getUserById/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable("id") int id)
+    {
+        return ResponseEntity.ok(adminService.getUserById(id));
+    }
 
     @PutMapping(value = "/disableUser")
     public ResponseEntity<User> disableUser(@Param("email") String email) {
@@ -88,10 +93,10 @@ public class AdminController {
     }
 
     @PostMapping(value = "/addProduct")
-    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO productDTO, @RequestParam("files") List<MultipartFile> files) {
-        Product product = new Product();
+    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO productDTO, @RequestParam("image") MultipartFile image) {
         Logger logger = Logger.getLogger(this.getClass().getName());
         logger.info("Add Product");
+        Product product = new Product();
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
@@ -100,20 +105,32 @@ public class AdminController {
         product.setCate_id(productDTO.getCategory_id());
         logger.info("Trước khi add product");
         Product result = productService.addProduct(product);
-
-        try {
-            for(int i = 0; i<files.size(); i++)
-            {
-
-                logger.info("Đã vào Try");
-                String fileUrl = cloudinaryService.uploadFile(files.get(i));
-                imageService.addNewImage(result.getId(),fileUrl);
-                logger.info("Đã lưu image");
-            }
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
+        if (image == null || image.isEmpty()) {
+            logger.info("File upload is missing or empty");
             return ResponseEntity.badRequest().build();
         }
+        try{
+            logger.info("Đã vào try");
+            String fileUrl = cloudinaryService.uploadFile(image);
+            imageService.addNewImage(result.getId(), fileUrl);
+            logger.info("Đã lưu image");
+            return ResponseEntity.ok(result);
+        }catch (Exception e){
+            logger.info("LỖI, nhảy vào catch");
+            return ResponseEntity.badRequest().build();
+        }
+
+//        try {
+//            for (MultipartFile file : files) {
+//                logger.info("Đã vào Try");
+//                String fileUrl = cloudinaryService.uploadFile(file);
+//                imageService.addNewImage(result.getId(), fileUrl);
+//                logger.info("Đã lưu image");
+//            }
+//            return ResponseEntity.ok(result);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().build();
+//        }
 
     }
     @DeleteMapping(value = "/deleteProduct/{id}")

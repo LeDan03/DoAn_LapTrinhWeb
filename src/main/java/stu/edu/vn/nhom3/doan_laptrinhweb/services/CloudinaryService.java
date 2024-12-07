@@ -15,7 +15,18 @@ public class CloudinaryService {
     private Cloudinary cloudinary;
 
     public String uploadFile(MultipartFile file) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-        return uploadResult.get("url").toString();
+        try {
+
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            String url = uploadResult.get("url") != null ? uploadResult.get("url").toString() : null;
+            if (url == null) {
+                throw new RuntimeException("Failed to retrieve file URL from Cloudinary response");
+            }
+            return url;
+        } catch (IOException e) {
+            System.err.println("Error uploading file to Cloudinary: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to upload file to Cloudinary", e);
+        }
     }
 }
