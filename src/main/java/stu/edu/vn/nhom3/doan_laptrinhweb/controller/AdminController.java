@@ -43,9 +43,18 @@ public class AdminController {
     ImageService imageService;
 
     @GetMapping(value = "getUserById/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") int id)
+    public ResponseEntity<RegisterUserDTO> getUserById(@PathVariable("id") int id)
     {
-        return ResponseEntity.ok(adminService.getUserById(id));
+        User user = adminService.getUserById(id);
+        RegisterUserDTO registerUserDTO = new RegisterUserDTO();
+        registerUserDTO = RegisterUserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .status(user.isStatus())
+                .email(user.getEmail())
+                .role_id(user.getRole_id())
+                .build();
+        return ResponseEntity.ok(registerUserDTO);
     }
 
     @PutMapping(value = "/disableUser/{email}")
