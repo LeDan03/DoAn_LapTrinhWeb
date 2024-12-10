@@ -57,22 +57,6 @@ public class UserService {
         return  user;
     }
 
-
-
-
-    public User putInfoInUser(String email ,String password,int role_id, String fullName) {
-        User user=new User();
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setRole_id(role_id);
-        user.setFullName(fullName);
-        return user;
-    }
-
-    public void saveUser(User user) {
-        userRepository.save(user);
-    }
-
     public boolean isValidUserLogin(String email, String password) {
         if(userRepository.getUserByEmail(email)!=null)
             if(passwordEncoder.matches(password,userRepository.getUserByEmail(email).getPasswordHash()))

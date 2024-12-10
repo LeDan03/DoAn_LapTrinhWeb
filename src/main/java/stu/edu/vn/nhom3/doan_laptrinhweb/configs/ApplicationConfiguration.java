@@ -1,5 +1,7 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.configs;
 
+import jakarta.servlet.MultipartConfigElement;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.unit.DataSize;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 
 @Configuration
@@ -44,5 +47,11 @@ public class ApplicationConfiguration {
 
         return authProvider;
     }
-
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofBytes(100000000L));
+        factory.setMaxRequestSize(DataSize.ofBytes(100000000L));
+        return factory.createMultipartConfig();
+    }
 }

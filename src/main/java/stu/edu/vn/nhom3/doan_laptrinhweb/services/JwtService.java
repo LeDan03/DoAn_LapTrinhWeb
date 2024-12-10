@@ -91,7 +91,6 @@ public class JwtService {
     }
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        System.out.println("Secret Key: " + secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
     public boolean isDuplicateEmail(String email) {

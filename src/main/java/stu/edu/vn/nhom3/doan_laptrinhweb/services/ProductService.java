@@ -45,7 +45,7 @@ public class ProductService {
     public void deleteProduct(int id) {
         productRepository.deleteById(id);
     }
-    public void updateProduct(int id, ProductDTO productDTO) {
+    public ResponseEntity<Product> updateProduct(int id, ProductDTO productDTO) {
         Logger logger = Logger.getLogger(this.getClass().getName());
         logger.info("DA VAO UPDATE PRODUCT SERVICE ");
         Product product = findById(id);
@@ -55,7 +55,6 @@ public class ProductService {
         product.setCate_id(productDTO.getCategory_id());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-        save(product);
-        logger.info(product.toString());
+        return ResponseEntity.ok(productRepository.save(product));
     }
 }

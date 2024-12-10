@@ -12,4 +12,5 @@ public class UpdateUserDTO {
     private String newFullName;
     private String newPassword;
     private String email;
+    private boolean status;
 }

@@ -1,24 +1,31 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
+
+import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import stu.edu.vn.nhom3.doan_laptrinhweb.configs.JwtAuthenticationFilter;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
+
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Image;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 @CrossOrigin("*")
@@ -42,6 +49,12 @@ public class AdminController {
     @Autowired
     ImageService imageService;
 
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping(value = "getUserById/{id}")
     public ResponseEntity<RegisterUserDTO> getUserById(@PathVariable("id") int id)
     {
@@ -57,9 +70,27 @@ public class AdminController {
         return ResponseEntity.ok(registerUserDTO);
     }
 
-    @PutMapping(value = "/disableUser/{email}")
-    public ResponseEntity<User> disableUser(@PathVariable("email") String email) {
-        return adminService.disableUser(email);
+    @PutMapping(value = "/updateUser/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable("id") int id, @RequestBody UpdateUserDTO userDTO, HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authentication.getPrincipal();
+        String token = request.getHeader("Authorization");
+        if(token!=null && token.startsWith("Bearer "))
+        {
+            token = token.substring(7);
+            try{
+                String emailFromToken = jwtService.extractUsername(token);
+                if(emailFromToken.equals(authenticatedUser.getEmail()) && emailFromToken.equals(userRepository.findById(id).get().getEmail()))
+                    return adminService.updateUser(id, userDTO);
+                else
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }catch (Exception e)
+            {
+                System.out.println("Error extracting username from token: " + e.getMessage());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
     @GetMapping(value = "/getAllUser")
@@ -103,55 +134,59 @@ public class AdminController {
     }
 
     @PostMapping(value = "/addProduct")
-    public ResponseEntity<Product> addProduct(@RequestBody ProductDTO productDTO, @RequestParam("image") MultipartFile image) {
-        Logger logger = Logger.getLogger(this.getClass().getName());
-        logger.info("Add Product");
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setTheme(productDTO.getTheme());
-        product.setUnit(productDTO.getUnit());
-        product.setCate_id(productDTO.getCategory_id());
-        logger.info("Trước khi add product");
-        Product result = productService.addProduct(product);
-        if (image == null || image.isEmpty()) {
-            logger.info("File upload is missing or empty");
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<Product> addProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("images") List<MultipartFile> images) {
+        if(!productService.isExistedProduct(productDTO.getName()))
+        {
+            Product product = new Product();
+            product.setName(productDTO.getName());
+            product.setDescription(productDTO.getDescription());
+            product.setPrice(productDTO.getPrice());
+            product.setCate_id(productDTO.getCategory_id());
+            product.setTheme(productDTO.getTheme());
+            product.setUnit(productDTO.getUnit());
+            try {
+                Product product1 = productService.addProduct(product);
+                if(images != null && !images.isEmpty()){
+                    for (MultipartFile image: images)
+                    {
+                        String fileUrl = cloudinaryService.uploadFile(image);
+                        imageService.addNewImage(product1.getId(), fileUrl);
+                    }
+                }
+                return ResponseEntity.ok(product1);
+            } catch (Exception e) {
+                return ResponseEntity.status(501).build();//Yêu cầu không thể được máy chủ thực hiện
+            }
         }
-        try{
-            logger.info("Đã vào try");
-            String fileUrl = cloudinaryService.uploadFile(image);
-            imageService.addNewImage(result.getId(), fileUrl);
-            logger.info("Đã lưu image");
-            return ResponseEntity.ok(result);
-        }catch (Exception e){
-            logger.info("LỖI, nhảy vào catch");
-            return ResponseEntity.badRequest().build();
-        }
-
-//        try {
-//            for (MultipartFile file : files) {
-//                logger.info("Đã vào Try");
-//                String fileUrl = cloudinaryService.uploadFile(file);
-//                imageService.addNewImage(result.getId(), fileUrl);
-//                logger.info("Đã lưu image");
-//            }
-//            return ResponseEntity.ok(result);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().build();
-//        }
-
+        return ResponseEntity.badRequest().body(null);
     }
     @DeleteMapping(value = "/deleteProduct/{id}")
     public void deleteProduct(@PathVariable("id") int id) {
+        List<Image> images = imageService.getImagesByProductId(id);
+        if(!images.isEmpty())
+            for(Image image : images)
+                cloudinaryService.deleteFile(image.getUrl());
+
         productService.deleteProduct(id);
+        imageService.deleteAllImageFromProduct(id);
+
         ResponseEntity.ok().build();
     }
 
     @PutMapping(value = "/updateProduct/{id}")
-    public void updateProduct(@PathVariable("id") int id, @RequestBody ProductDTO productDTO) {
+    public void updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDTO productDTO
+            , @RequestParam("images") List<MultipartFile> images) {
         productService.updateProduct(id, productDTO);
+        if(!images.isEmpty())
+        {
+            List<String> urls = new ArrayList<>();
+            for(MultipartFile image : images)
+            {
+                String fileUrl = cloudinaryService.uploadFile(image);
+                urls.add(fileUrl);
+            }
+            imageService.updateImages(id, urls);
+        }
         ResponseEntity.ok().build();
     }
 
@@ -161,13 +196,4 @@ public class AdminController {
         return ResponseEntity.ok().body(adminService.getAllProduct());
     }
 
-    @PostMapping(value = "/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            String fileUrl = cloudinaryService.uploadFile(file);
-            return ResponseEntity.ok(fileUrl);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
-        }
-    }
 }

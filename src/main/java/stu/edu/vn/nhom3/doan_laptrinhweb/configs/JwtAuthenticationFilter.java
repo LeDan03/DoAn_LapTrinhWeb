@@ -45,16 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.info("TOKEN INVALID");
+            logger.info("No Authorization header, skipping JWT filter.");
             filterChain.doFilter(request, response);
             return;
         }
         try {
             final String jwt = authHeader.substring(7);
-
             final String userEmail = jwtService.extractUsername(jwt);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+            logger.info("email from token: " + userEmail);
+            logger.info("JWT: " + jwt);
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -71,6 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
+            logger.error("Error in JwtAuthenticationFilter: " + exception.getMessage());
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }

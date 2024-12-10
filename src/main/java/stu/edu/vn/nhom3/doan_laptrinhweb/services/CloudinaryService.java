@@ -14,19 +14,47 @@ public class CloudinaryService {
     @Autowired
     private Cloudinary cloudinary;
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file){
         try {
-
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
             String url = uploadResult.get("url") != null ? uploadResult.get("url").toString() : null;
             if (url == null) {
-                throw new RuntimeException("Failed to retrieve file URL from Cloudinary response");
+                return "URL is null, upload failed";
             }
             return url;
         } catch (IOException e) {
-            System.err.println("Error uploading file to Cloudinary: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to upload file to Cloudinary", e);
+            return "Can not upload file";
         }
     }
+
+    public void deleteFile(String url){
+        try {
+            String publicId = extractPublicIdFromUrl(url);
+            Map result = cloudinary.uploader().destroy(publicId,ObjectUtils.emptyMap());
+            result.get("result");
+        }catch (Exception ignored){
+        }
+    }
+
+    private String extractPublicIdFromUrl(String url) {
+        // Cắt phần "https://res.cloudinary.com/xxx/image/upload/" khỏi URL
+        String[] parts = url.split("/image/upload/");
+        if (parts.length > 1) {
+            String publicIdWithExtension = parts[1].split("\\?")[0]; // lấy phần trước dấu "?" nếu có
+            publicIdWithExtension = publicIdWithExtension.split("\\.")[0]; // lấy phần trước dấu "."
+
+            // Cắt bỏ phiên bản (version) nếu có (phần bắt đầu bằng "v" theo sau là số)
+            if (publicIdWithExtension.startsWith("v")) {
+                // Nếu có version, public_id sẽ là phần sau version
+                String[] versionAndPublicId = publicIdWithExtension.split("/", 2);
+                if (versionAndPublicId.length > 1) {
+                    return versionAndPublicId[1];  // trả về phần public_id
+                }
+            } else {
+                return publicIdWithExtension;
+            }
+        }
+        return null; // nếu không tìm thấy public_id
+    }
+
 }

@@ -1,8 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,10 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.LoginUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Cart;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.response.LoginResponse;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.AuthenticationService;
+import stu.edu.vn.nhom3.doan_laptrinhweb.services.CartService;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.JwtService;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.UserService;
 
@@ -32,6 +32,9 @@ public class AuthenticationController {
     @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
+    private CartService cartService;
+
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, BCryptPasswordEncoder passwordEncoder, UserService userService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
@@ -40,12 +43,13 @@ public class AuthenticationController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterUserDTO registerUserDto) {
         if(!jwtService.isDuplicateEmail(registerUserDto.getEmail())&&registerUserDto.getEmail()!=null
             &&registerUserDto.getPassword()!=null)
         {
             User registeredUser = authenticationService.signup(registerUserDto);
+            Cart cart = cartService.addNewCart(registeredUser.getId());
             User toShowUser = new User();
             toShowUser.setEmail(registerUserDto.getEmail());
             toShowUser.setFullName(registerUserDto.getFullName());
@@ -68,20 +72,6 @@ public class AuthenticationController {
         loginResponse.setStatus(authenticatedUser.isStatus());
         Authentication authentication = new UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities());
         return ResponseEntity.ok(loginResponse);
-    }
-
-    @PutMapping(value = "/update")
-    public ResponseEntity<User> update(@RequestBody UpdateUserDTO updateUserDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated())
-            return ResponseEntity.status(403).body(null);
-
-        User authenticationUser  = (User ) authentication.getPrincipal();
-        if (!authenticationUser .getEmail().equals(updateUserDto.getEmail()))
-            return ResponseEntity.status(403).body(null);
-
-        User updatedUser  = userService.updateUserByEmail(updateUserDto);
-        return ResponseEntity.ok(updatedUser );
     }
 }
 

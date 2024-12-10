@@ -1,6 +1,7 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.dto;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor
 @AllArgsConstructor
