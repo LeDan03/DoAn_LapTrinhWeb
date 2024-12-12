@@ -14,10 +14,7 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
-import stu.edu.vn.nhom3.doan_laptrinhweb.repository.AdminRepository;
-import stu.edu.vn.nhom3.doan_laptrinhweb.repository.CategoryRepository;
-import stu.edu.vn.nhom3.doan_laptrinhweb.repository.ProductRepository;
-import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +37,9 @@ public class AdminService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ImageRepository imageRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -84,6 +84,7 @@ public class AdminService {
         List<CategoryDTO> categoryDTOS=new ArrayList<>();
         categoryDTOS=categories.stream().map(category -> {
             return CategoryDTO.builder()
+                    .id(category.getId())
                     .name(category.getName())
                     .code(category.getCode())
                     .build();
@@ -94,18 +95,29 @@ public class AdminService {
         List<Product> products=new ArrayList<>();
         products=productRepository.findAll();
         List<ProductDTO> productDTOS=new ArrayList<>();
+
         productDTOS=products.stream().map(product -> {
+            List<String> images = new ArrayList<>();
+            imageRepository.findAll().forEach(image -> {
+                if (image.getProduct_id() == product.getId()){
+                    images.add(image.getUrl());
+                }
+            });
             return ProductDTO.builder()
+                    .id(product.getId())
                     .name(product.getName())
                     .price(product.getPrice())
                     .theme(product.getTheme())
                     .unit(product.getUnit())
                     .category_id(product.getCate_id())
+                    .category_name(product.getCategory().getName())
                     .description(product.getDescription())
+                    .listImage(images)
                     .build();
         }).collect(Collectors.toList());
         return productDTOS;
     }
+
     public User getUserById(int id) {
         return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
     }

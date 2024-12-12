@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.ProductRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -33,6 +34,8 @@ public class ProductService {
         }
         return null;
     }
+
+
     public boolean isExistedProduct(String name)
     {
         for(Product p : productRepository.findAll())
@@ -42,8 +45,24 @@ public class ProductService {
         }
         return false;
     }
-    public void deleteProduct(int id) {
-        productRepository.deleteById(id);
+//    public Product findProductById(int id) {
+//        return
+//    }
+
+    public Response deleteProduct(int id) {
+
+
+            try{
+                Product product = productRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Product not found"));
+                if (product.getId() > 0){
+                    productRepository.deleteById(id);
+                    return new Response(true, "Xóa thành công");
+                }else{
+                    return new Response(false, "Xóa lỗi");
+                }
+            }catch (Exception e) {
+                return new Response(false, "Không tìm thấy sản phẩm cần xóa với id = "+ id);
+            }
     }
     public ResponseEntity<Product> updateProduct(int id, ProductDTO productDTO) {
         Logger logger = Logger.getLogger(this.getClass().getName());

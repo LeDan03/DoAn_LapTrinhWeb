@@ -3,7 +3,7 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.dto;
 import lombok.*;
 
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor 
 @Builder
 @Getter
 @Setter

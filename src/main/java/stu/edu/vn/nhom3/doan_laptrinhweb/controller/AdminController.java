@@ -21,6 +21,7 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.model.Image;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
 
@@ -111,20 +112,24 @@ public class AdminController {
     }
 
     @PutMapping(value = "/updateCategory/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable("id") int id,@RequestBody CategoryDTO categoryDTO) {
-        categoryService.updateCategory(id, categoryDTO);
-        return ResponseEntity.ok().body(null);
+    public ResponseEntity<String> updateCategory(@PathVariable("id") int id,@RequestBody CategoryDTO categoryDTO) {
+        Response result = categoryService.updateCategory(id, categoryDTO);
+        if (result.isSuccess()){
+            return ResponseEntity.ok(result.getMessage());
+        }else{
+            return ResponseEntity.badRequest().body(result.getMessage());
+        }
     }
 
     @DeleteMapping(value = "/deleteCategory/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable("id") int id) {
         Logger logger = Logger.getLogger(this.getClass().getName());
         logger.info("Delete Category");
-        boolean result = categoryService.deleteCategory(id);
-        if(result)
-            return ResponseEntity.ok("Da xoa Category co id: "+id);
+        Response result = categoryService.deleteCategory(id);
+        if(result.isSuccess())
+            return ResponseEntity.ok(result.getMessage());
         else
-            return ResponseEntity.badRequest().body("Không xóa được Category có id: "+id);
+            return ResponseEntity.badRequest().body(result.getMessage());
     }
 
     @GetMapping(value = "/getAllCategory")
@@ -133,10 +138,40 @@ public class AdminController {
         return ResponseEntity.ok().body(adminService.getAllCategory());
     }
 
+//    @PostMapping(value = "/addProduct")
+//    public ResponseEntity<Product> addProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("images") List<MultipartFile> images) {
+//        if(!productService.isExistedProduct(productDTO.getName()))
+//        {
+//            Product product = new Product();
+//            product.setName(productDTO.getName());
+//            product.setDescription(productDTO.getDescription());
+//            product.setPrice(productDTO.getPrice());
+//            product.setCate_id(productDTO.getCategory_id());
+//            product.setTheme(productDTO.getTheme());
+//            product.setUnit(productDTO.getUnit());
+//            try {
+//                Product product1 = productService.addProduct(product);
+//                if(images != null && !images.isEmpty()){
+//                    for (MultipartFile image: images)
+//                    {
+//                        String fileUrl = cloudinaryService.uploadFile(image);
+//                        imageService.addNewImage(product1.getId(), fileUrl);
+//                    }
+//                }
+//                return ResponseEntity.ok(product1);
+//            } catch (Exception e) {
+//                return ResponseEntity.status(501).build();//Yêu cầu không thể được máy chủ thực hiện
+//            }
+//        }
+//        return ResponseEntity.badRequest().body(null);
+//    }
+
     @PostMapping(value = "/addProduct")
-    public ResponseEntity<Product> addProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("images") List<MultipartFile> images) {
-        if(!productService.isExistedProduct(productDTO.getName()))
-        {
+    public ResponseEntity<Product> addProduct(
+            @ModelAttribute ProductDTO productDTO,
+            @RequestParam("images") List<MultipartFile> images) {
+
+        if (!productService.isExistedProduct(productDTO.getName())) {
             Product product = new Product();
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
@@ -144,33 +179,43 @@ public class AdminController {
             product.setCate_id(productDTO.getCategory_id());
             product.setTheme(productDTO.getTheme());
             product.setUnit(productDTO.getUnit());
+
             try {
-                Product product1 = productService.addProduct(product);
-                if(images != null && !images.isEmpty()){
-                    for (MultipartFile image: images)
-                    {
+                Product savedProduct = productService.addProduct(product);
+
+                // Upload images nếu có
+                if (images != null && !images.isEmpty()) {
+                    for (MultipartFile image : images) {
                         String fileUrl = cloudinaryService.uploadFile(image);
-                        imageService.addNewImage(product1.getId(), fileUrl);
+                        imageService.addNewImage(savedProduct.getId(), fileUrl);
                     }
                 }
-                return ResponseEntity.ok(product1);
+
+                return ResponseEntity.ok(savedProduct);
+
             } catch (Exception e) {
-                return ResponseEntity.status(501).build();//Yêu cầu không thể được máy chủ thực hiện
+                // Trả về lỗi 501 nếu xử lý thất bại
+                return ResponseEntity.status(501).build();
             }
         }
+
+        // Trả về lỗi bad request nếu sản phẩm đã tồn tại
         return ResponseEntity.badRequest().body(null);
     }
     @DeleteMapping(value = "/deleteProduct/{id}")
-    public void deleteProduct(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable("id") int id) {
         List<Image> images = imageService.getImagesByProductId(id);
         if(!images.isEmpty())
             for(Image image : images)
                 cloudinaryService.deleteFile(image.getUrl());
 
-        productService.deleteProduct(id);
-        imageService.deleteAllImageFromProduct(id);
-
-        ResponseEntity.ok().build();
+        Response result = productService.deleteProduct(id);
+            imageService.deleteAllImageFromProduct(id);
+        if(result.isSuccess())
+            return ResponseEntity.ok(result.getMessage());
+        else
+            return ResponseEntity.badRequest().body(result.getMessage());
+//        ResponseEntity.ok().build();
     }
 
     @PutMapping(value = "/updateProduct/{id}")

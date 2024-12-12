@@ -8,6 +8,8 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.CategoryRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.repository.ProductRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,6 +21,8 @@ public class CategoryService {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductRepository productRepository;
 
     public List<Category> findAll() {
         return categoryRepository.findAll();
@@ -40,33 +44,49 @@ public class CategoryService {
         return false;
     }
 
-    public boolean deleteCategory(int id) {
-        Category category = categoryRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Category not found"));
-        if(isEmptyCategory(id)) {
-            categoryRepository.delete(category);
-            return true;
+    public Response deleteCategory(int id) {
+        try {
+            Category category = categoryRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                if (category.getId() > 0){
+                    boolean check = isEmptyCategory(id);
+                    if (check){
+                        return new Response(false, "Category có tồn tại sản phẩm!!!");
+                    }else{
+                        categoryRepository.delete(category);
+                        return new Response(true, "Xóa thành công");
+                    }
+                }else{
+                    return new Response(false, "Category found: " + category.getName());
+                }
+        } catch (EntityNotFoundException e) {
+            return new Response(false, e.getMessage());
         }
-        else
-            return false;
     }
 
-    public void updateCategory(int id, CategoryDTO updatedCategory) {
-        Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Category not found with given id : " + id)
-        );
-
-        category.setName(updatedCategory.getName());
-        category.setCode(updatedCategory.getCode());
-        Category updatedCategoryObj = categoryRepository.save(category);
-        ResponseEntity.ok(updatedCategoryObj);
+    public Response updateCategory(int id, CategoryDTO updatedCategory) {
+        try {
+            Category category = categoryRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+            if (category.getId() > 0){
+                category.setName(updatedCategory.getName());
+                category.setCode(updatedCategory.getCode());
+                Category updatedCategoryObj = categoryRepository.save(category);
+                return  new Response(true, "Update thành công");
+            }else{
+                return new Response(false, "Category found: " + category.getName());
+            }
+        } catch (EntityNotFoundException e) {
+            return new Response(false, e.getMessage());
+        }
     }
+
     public boolean isEmptyCategory(int id)
     {
-        for(Product p : productService.findAll())
+        for(Product p : productRepository.findAll())
         {
-            if(p.getId() == id)
-                return false;
+            if(p.getCategory().getId() == id) return true;
         }
-        return true;
+        return false;
     }
 }
