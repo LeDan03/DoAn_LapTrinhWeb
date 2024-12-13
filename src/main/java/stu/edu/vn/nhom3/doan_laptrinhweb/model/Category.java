@@ -1,5 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,9 +20,11 @@ public class Category {
 
     @Column(nullable = false, length = 200)
     private String name;
+
     @Column(columnDefinition = "char(150)")
     private String code;
 
     @OneToMany(mappedBy = "category")
+    @JsonManagedReference("category-product")
     private List<Product> products;
 }

@@ -45,9 +45,6 @@ public class ProductService {
         }
         return false;
     }
-//    public Product findProductById(int id) {
-//        return
-//    }
 
     public Response deleteProduct(int id) {
 

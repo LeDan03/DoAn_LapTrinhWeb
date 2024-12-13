@@ -12,6 +12,7 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Order;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.*;
@@ -42,26 +43,8 @@ public class AdminService {
     ImageRepository imageRepository;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    OrderService orderService;
 
-    @Transactional
-    public ResponseEntity<User> updateUser(int id, UpdateUserDTO userDTO)
-    {
-        User user = userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
-        if(userService.getUserByEmail(userDTO.getEmail())==null)
-        {
-            if(!userDTO.getEmail().isEmpty())
-                user.setEmail(userDTO.getEmail());
-            if(!userDTO.getNewFullName().isEmpty())
-                user.setFullName(userDTO.getNewFullName());
-            if(!userDTO.getNewPassword().isEmpty())
-                user.setPasswordHash(passwordEncoder.encode(userDTO.getNewPassword()));
-            user.setStatus(userDTO.isStatus());
-            User result = userRepository.save(user);
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().build();
-    }
     public List<RegisterUserDTO> getAllUser(){
         List<User> users=new ArrayList<>();
         users=userRepository.findAll();
@@ -120,5 +103,15 @@ public class AdminService {
 
     public User getUserById(int id) {
         return userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
+    }
+
+    public boolean updateOrderStatus(String status, long id) {
+        Order order = orderService.findById(id);
+        if(order != null) {
+            order.setStatus(status);
+            orderService.save(order);
+            return true;
+        }
+        return false;
     }
 }

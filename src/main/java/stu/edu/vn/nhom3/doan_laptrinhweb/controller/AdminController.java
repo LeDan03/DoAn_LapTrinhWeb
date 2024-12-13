@@ -15,11 +15,9 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
 
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Image;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
+import stu.edu.vn.nhom3.doan_laptrinhweb.repository.PaymentRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
@@ -56,6 +54,15 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
+
     @GetMapping(value = "getUserById/{id}")
     public ResponseEntity<RegisterUserDTO> getUserById(@PathVariable("id") int id)
     {
@@ -71,28 +78,22 @@ public class AdminController {
         return ResponseEntity.ok(registerUserDTO);
     }
 
-    @PutMapping(value = "/updateUser/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") int id, @RequestBody UpdateUserDTO userDTO, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User authenticatedUser = (User) authentication.getPrincipal();
-        String token = request.getHeader("Authorization");
-        if(token!=null && token.startsWith("Bearer "))
+    @PutMapping(value = "/disableOrAble/{user_id}")
+    public ResponseEntity<String> disableUser(@PathVariable("user_id") int id, @RequestParam("status") boolean status)
+    {
+        User user = adminService.getUserById(id);
+        if(user!=null)
         {
-            token = token.substring(7);
-            try{
-                String emailFromToken = jwtService.extractUsername(token);
-                if(emailFromToken.equals(authenticatedUser.getEmail()) && emailFromToken.equals(userRepository.findById(id).get().getEmail()))
-                    return adminService.updateUser(id, userDTO);
-                else
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            }catch (Exception e)
-            {
-                System.out.println("Error extracting username from token: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            }
+            user.setStatus(status);
+            userRepository.save(user);
+            if(!status)
+                return ResponseEntity.ok("User is disabled");
+            return ResponseEntity.ok("User is able");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        return ResponseEntity.ok("User is not found");
     }
+
+
 
     @GetMapping(value = "/getAllUser")
     public ResponseEntity<List<RegisterUserDTO>> getAllUser() {
@@ -137,7 +138,7 @@ public class AdminController {
     {
         return ResponseEntity.ok().body(adminService.getAllCategory());
     }
-
+//
 //    @PostMapping(value = "/addProduct")
 //    public ResponseEntity<Product> addProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("images") List<MultipartFile> images) {
 //        if(!productService.isExistedProduct(productDTO.getName()))
@@ -198,7 +199,6 @@ public class AdminController {
                 return ResponseEntity.status(501).build();
             }
         }
-
         // Trả về lỗi bad request nếu sản phẩm đã tồn tại
         return ResponseEntity.badRequest().body(null);
     }
@@ -241,4 +241,49 @@ public class AdminController {
         return ResponseEntity.ok().body(adminService.getAllProduct());
     }
 
+    @GetMapping("/findProduct/{product_id}")
+    public ResponseEntity<ProductDTO> findProductById(@PathVariable("product_id") int id) {
+
+        Product product = productService.findById(id);
+        if(product!=null)
+        {
+            List<Image> product_images = imageService.getImagesByProductId(id);
+            Category category = categoryService.findById(product.getCate_id());
+
+            ProductDTO productDTO = new ProductDTO();
+            productDTO.setName(product.getName());
+            productDTO.setDescription(product.getDescription());
+            productDTO.setPrice(product.getPrice());
+            productDTO.setUnit(product.getUnit());
+            productDTO.setTheme(product.getTheme());
+            productDTO.setId(product.getId());
+            productDTO.setCategory_id(product.getCate_id());
+            productDTO.setCategory_name(category.getName());
+            productDTO.setListImage(imageService.getProductImagesLink(product_images));
+            return ResponseEntity.ok(productDTO);
+        }
+
+        return ResponseEntity.badRequest().body(null);
+    }
+
+    @PostMapping(value = "/addNewPayment")
+    public ResponseEntity<String> addNewPayment(@RequestParam("payment_name") String paymentName )
+    {
+        if(paymentService.isExistedPayment(paymentName))
+            return ResponseEntity.badRequest().body("Payment existed!");
+        Payment payment = new Payment();
+        payment.setName(paymentName);
+        paymentService.save(payment);
+        return ResponseEntity.ok().body("Adding new payment " + paymentName+ " successfully");
+    }
+
+    @PutMapping(value = "/updateOrderStatus/{order_id}")
+    public ResponseEntity<String> updateOrderStatus(@PathVariable("order_id") int id, @RequestParam("status") String status)
+    {
+        Order order = orderService.findById(id);
+        String oldStatus = order.getStatus();
+        order.setStatus(status);
+        orderService.save(order);
+        return ResponseEntity.ok().body("Update status successfully, new status: " + order.getStatus()+", old status: " + oldStatus);
+    }
 }

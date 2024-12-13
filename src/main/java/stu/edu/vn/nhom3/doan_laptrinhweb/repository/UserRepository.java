@@ -19,4 +19,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
                            @Param("newPassword") String newPassword);
     Optional<User> findByEmail(String email);
     User getUserByEmail(String email);
+    User findUserById(int id);
 }

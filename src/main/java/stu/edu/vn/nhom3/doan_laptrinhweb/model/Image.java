@@ -1,5 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class Image {
     private int product_id;
 
     @ManyToOne
+    @JsonBackReference("image-product")
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 }

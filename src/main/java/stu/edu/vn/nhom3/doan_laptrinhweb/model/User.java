@@ -1,6 +1,7 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,13 +46,17 @@ public class User implements Serializable, UserDetails {
     private int role_id;
 
     @ManyToOne
-    @JsonBackReference
+    @JsonBackReference("role-user")
     @JoinColumn(name = "role_id", insertable = false, updatable = false)
     private Role role;
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Cart cart;
+
+    @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
+    @JsonManagedReference("order-user")
+    private List<Order> orders;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -36,6 +36,11 @@ public class CategoryService {
         }
         return false;
     }
+
+    public Category findById(int id) {
+        return categoryRepository.findById(id).get();
+    }
+
     public boolean addCategory(Category category) {
         if(!isExistedCategory(category.getName())) {
             categoryRepository.save(category);

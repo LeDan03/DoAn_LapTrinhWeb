@@ -1,5 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,13 +15,16 @@ import java.io.Serializable;
 @Table
 @IdClass(CartProductId.class)
 public class CartProduct implements Serializable {
+    //tuần tự hóa (convert thành stream byte)
 
     //Sử dụng composite khóa chính
     @ManyToOne
+    @JsonBackReference("cart-cartProduct")
     @JoinColumn(name = "cart_id", nullable = false,insertable = false, updatable = false)
     private Cart cart;
 
     @ManyToOne
+    @JsonBackReference("cartProduct-product")
     @JoinColumn(name = "product_id", nullable = false,insertable = false, updatable = false)
     private Product product;
 

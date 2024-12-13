@@ -1,21 +1,18 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Entity
-@Table
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class Role {
+@Entity
+@Table
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -23,8 +20,7 @@ public class Role {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL)
-    @JsonManagedReference("role-user")
-    private List<User> users;
-
+    @OneToMany(mappedBy = "payment")
+    @JsonManagedReference("order-payment")
+    private List<Order> orders;
 }

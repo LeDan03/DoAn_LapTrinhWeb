@@ -20,13 +20,18 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    RoleService   roleService;
+
+    private RoleService   roleService;
     @Autowired
     PasswordEncoder passwordEncoder;
 
     public User getUserByEmail(String email)
     {
         return userRepository.getUserByEmail(email);
+    }
+    public User findUserById(int id)
+    {
+        return userRepository.findUserById(id);
     }
     public RegisterUserDTO getUserDTOByEmail(String email)
     {
@@ -45,35 +50,22 @@ public class UserService {
         return null;
     }
     @Transactional
-    public User updateUserByEmail(UpdateUserDTO userDTO)
+    public ResponseEntity<User> updateUser(String email, UpdateUserDTO userDTO)
     {
-        User user = userRepository.getUserByEmail(userDTO.getEmail());
-        if (user != null){
-            userRepository.updateUserByEmail(userDTO.getEmail(),
-                    userDTO.getNewFullName(),
-                    passwordEncoder.encode(userDTO.getNewPassword()));
-            user = userRepository.getUserByEmail(userDTO.getEmail());
+        User user = getUserByEmail(email);
+        if(getUserByEmail(userDTO.getEmail())==null)
+        {
+            if(!userDTO.getEmail().isEmpty())
+                user.setEmail(userDTO.getEmail());
+            if(!userDTO.getNewFullName().isEmpty())
+                user.setFullName(userDTO.getNewFullName());
+            if(!userDTO.getNewPassword().isEmpty())
+                user.setPasswordHash(passwordEncoder.encode(userDTO.getNewPassword()));
+            user.setStatus(userDTO.isStatus());
+            User result = userRepository.save(user);
+            return ResponseEntity.ok(result);
         }
-        return  user;
-    }
-
-    public boolean isValidUserLogin(String email, String password) {
-        if(userRepository.getUserByEmail(email)!=null)
-            if(passwordEncoder.matches(password,userRepository.getUserByEmail(email).getPasswordHash()))
-                return true;
-        return false;
-    }
-
-    public boolean isValidUserRegister(String email, String password) {
-        User user= userRepository.getUserByEmail(email);
-        if(user!=null)
-            return false;
-        else{
-            if (password.length()<8) {
-                return false;
-            }
-        }
-        return true;
+        return ResponseEntity.badRequest().build();
     }
 
 }

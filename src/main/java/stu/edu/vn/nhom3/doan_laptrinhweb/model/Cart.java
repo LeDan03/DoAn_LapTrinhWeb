@@ -1,5 +1,6 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class Cart {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart")
+    @JsonManagedReference("cart-cartProduct")
     private List<CartProduct> cartProducts;
 }

@@ -1,5 +1,7 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,12 +39,19 @@ public class Product {
     private int cate_id;
 
     @ManyToOne
+    @JsonBackReference("category-product")
     @JoinColumn(name = "cate_id",insertable = false, updatable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
+    @JsonManagedReference("image-product")
     private List<Image> images;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product")
+    @JsonManagedReference("cartProduct-product")
     private List<CartProduct> cartProducts;
+
+    @OneToMany(mappedBy = "product")
+    @JsonManagedReference("product-productOrder")
+    private List<ProductOrder> productOrders;
 }

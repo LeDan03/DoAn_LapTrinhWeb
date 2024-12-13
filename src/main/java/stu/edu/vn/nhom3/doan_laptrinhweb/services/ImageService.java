@@ -83,4 +83,11 @@ public class ImageService {
         List<Image> images = getImagesByProductId(product_id);
         imageRepository.deleteAll(images);
     }
+
+    public List<String> getProductImagesLink(List<Image> images) {
+        List<String> links = new ArrayList<>();
+        for(Image image : images)
+            links.add(image.getUrl());
+        return links;
+    }
 }
