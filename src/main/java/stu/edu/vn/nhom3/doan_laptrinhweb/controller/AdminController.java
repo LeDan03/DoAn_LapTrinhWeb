@@ -73,7 +73,7 @@ public class AdminController {
                 .fullName(user.getFullName())
                 .status(user.isStatus())
                 .email(user.getEmail())
-                .role_id(user.getRole().getId())
+                .role_id(user.getRole_id())
                 .build();
         return ResponseEntity.ok(registerUserDTO);
     }
@@ -124,6 +124,8 @@ public class AdminController {
 
     @DeleteMapping(value = "/deleteCategory/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable("id") int id) {
+        Logger logger = Logger.getLogger(this.getClass().getName());
+        logger.info("Delete Category");
         Response result = categoryService.deleteCategory(id);
         if(result.isSuccess())
             return ResponseEntity.ok(result.getMessage());
@@ -217,9 +219,8 @@ public class AdminController {
     }
 
     @PutMapping(value = "/updateProduct/{id}")
-    public void updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDTO productDTO
+    public Response updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDTO productDTO
             , @RequestParam("images") List<MultipartFile> images) {
-        productService.updateProduct(id, productDTO);
         if(!images.isEmpty())
         {
             List<String> urls = new ArrayList<>();
@@ -230,7 +231,9 @@ public class AdminController {
             }
             imageService.updateImages(id, urls);
         }
-        ResponseEntity.ok().build();
+
+        return productService.updateProduct(id, productDTO);
+
     }
 
     @GetMapping(value = "/getAllProduct")
@@ -283,12 +286,5 @@ public class AdminController {
         order.setStatus(status);
         orderService.save(order);
         return ResponseEntity.ok().body("Update status successfully, new status: " + order.getStatus()+", old status: " + oldStatus);
-    }
-
-    @GetMapping(value = "/getAllOrders")
-    public ResponseEntity<List<Order>> getAllOrderṣ̣̣̣()
-    {
-        List<Order> orders = orderService.findAll();
-        return ResponseEntity.ok().body(orders);
     }
 }

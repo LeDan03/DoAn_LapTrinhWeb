@@ -54,7 +54,7 @@ public class AdminService {
                     .id(user.getId())
                     .email(user.getEmail())
                     .fullName(user.getFullName())
-                    .role_id(user.getRole().getId())
+                    .role_id(user.getRole_id())
                     .status(user.isStatus())
                     .build();
         }).collect(Collectors.toList());

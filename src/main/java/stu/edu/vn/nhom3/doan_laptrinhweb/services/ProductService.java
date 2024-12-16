@@ -61,7 +61,7 @@ public class ProductService {
                 return new Response(false, "Không tìm thấy sản phẩm cần xóa với id = "+ id);
             }
     }
-    public ResponseEntity<Product> updateProduct(int id, ProductDTO productDTO) {
+    public Response updateProduct(int id, ProductDTO productDTO) {
         Logger logger = Logger.getLogger(this.getClass().getName());
         logger.info("DA VAO UPDATE PRODUCT SERVICE ");
         Product product = findById(id);
@@ -71,6 +71,12 @@ public class ProductService {
         product.setCate_id(productDTO.getCategory_id());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-        return ResponseEntity.ok(productRepository.save(product));
+        try{
+            productRepository.save(product);
+            return new Response(true, "Sửa thành công");
+        }catch (Exception e) {
+            return new Response(false, "Sửa lỗi vui lòng kiểm tra lại");
+        }
+
     }
 }

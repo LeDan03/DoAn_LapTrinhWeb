@@ -6,10 +6,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.LoginUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Role;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.RoleRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
@@ -36,23 +34,14 @@ public class AuthenticationService {
         this.roleService = roleService;
         this.roleRepository = roleRepository;
     }
-
-    @Transactional
     public User signup(RegisterUserDTO input) {
         User user = new User();
-        Role userRole = roleService.findByName("USER");
-        if(userRole!=null)
-        {
-            user.setEmail(input.getEmail());
-            user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
-            user.setStatus(true);
-            user.setFullName(input.getFullName());
-            user.setRole(userRole);
-            userRole.getUsers().add(user);
-
-            return userRepository.save(user);
-        }
-        return null;
+        user.setEmail(input.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
+        user.setStatus(true);
+        user.setRole_id(2);
+        user.setFullName(input.getFullName());
+        return userRepository.save(user);
     }
 
     public User authenticate(LoginUserDTO input) {
