@@ -45,15 +45,20 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterUserDTO registerUserDto) {
-        if(!jwtService.isDuplicateEmail(registerUserDto.getEmail())&&registerUserDto.getEmail()!=null
-            &&registerUserDto.getPassword()!=null)
+        if(!jwtService.isDuplicateEmail(registerUserDto.getEmail())
+                && registerUserDto.getEmail()!=null
+                &&registerUserDto.getPassword()!=null)
         {
             User registeredUser = authenticationService.signup(registerUserDto);
-            Cart cart = cartService.addNewCart(registeredUser.getId());
-            User toShowUser = new User();
-            toShowUser.setEmail(registerUserDto.getEmail());
-            toShowUser.setFullName(registerUserDto.getFullName());
-            return ResponseEntity.ok(toShowUser);
+            if(registeredUser!=null)
+            {
+                Cart cart = cartService.addNewCart(registeredUser.getId());
+                User toShowUser = new User();
+                toShowUser.setEmail(registerUserDto.getEmail());
+                toShowUser.setFullName(registerUserDto.getFullName());
+                return ResponseEntity.ok(toShowUser);
+            }
+            return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.badRequest().body(null);
     }
@@ -69,7 +74,7 @@ public class AuthenticationController {
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
         loginResponse.setEmail(authenticatedUser.getEmail());
         loginResponse.setFullname(authenticatedUser.getFullName());
-        loginResponse.setRoleId(authenticatedUser.getRole_id());
+        loginResponse.setRoleId(authenticatedUser.getRole().getId());
         loginResponse.setStatus(authenticatedUser.isStatus());
         Authentication authentication = new UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities());
         return ResponseEntity.ok(loginResponse);

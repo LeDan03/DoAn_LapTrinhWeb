@@ -73,7 +73,7 @@ public class AdminController {
                 .fullName(user.getFullName())
                 .status(user.isStatus())
                 .email(user.getEmail())
-                .role_id(user.getRole_id())
+                .role_id(user.getRole().getId())
                 .build();
         return ResponseEntity.ok(registerUserDTO);
     }
@@ -124,8 +124,6 @@ public class AdminController {
 
     @DeleteMapping(value = "/deleteCategory/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable("id") int id) {
-        Logger logger = Logger.getLogger(this.getClass().getName());
-        logger.info("Delete Category");
         Response result = categoryService.deleteCategory(id);
         if(result.isSuccess())
             return ResponseEntity.ok(result.getMessage());
@@ -286,5 +284,12 @@ public class AdminController {
         order.setStatus(status);
         orderService.save(order);
         return ResponseEntity.ok().body("Update status successfully, new status: " + order.getStatus()+", old status: " + oldStatus);
+    }
+
+    @GetMapping(value = "/getAllOrders")
+    public ResponseEntity<List<Order>> getAllOrderṣ̣̣̣()
+    {
+        List<Order> orders = orderService.findAll();
+        return ResponseEntity.ok().body(orders);
     }
 }

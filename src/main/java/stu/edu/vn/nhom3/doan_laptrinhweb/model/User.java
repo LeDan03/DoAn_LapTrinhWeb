@@ -42,12 +42,9 @@ public class User implements Serializable, UserDetails {
     @Column(columnDefinition = "boolean default true")
     private boolean status;
 
-    @Column
-    private int role_id;
-
     @ManyToOne
     @JsonBackReference("role-user")
-    @JoinColumn(name = "role_id", insertable = false, updatable = false)
+    @JoinColumn(name = "role_id")
     private Role role;
 
 
@@ -61,6 +58,8 @@ public class User implements Serializable, UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         //new SimpleGrantedAuthority(role.getName())
+        if(role!=null)
+            return List.of(new SimpleGrantedAuthority(role.getName()));
         return List.of();
     }
 
