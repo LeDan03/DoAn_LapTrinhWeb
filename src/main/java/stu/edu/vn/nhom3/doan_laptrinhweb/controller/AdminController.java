@@ -219,9 +219,8 @@ public class AdminController {
     }
 
     @PutMapping(value = "/updateProduct/{id}")
-    public void updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDTO productDTO
+    public Response updateProduct(@PathVariable("id") int id, @ModelAttribute ProductDTO productDTO
             , @RequestParam("images") List<MultipartFile> images) {
-        productService.updateProduct(id, productDTO);
         if(!images.isEmpty())
         {
             List<String> urls = new ArrayList<>();
@@ -232,7 +231,9 @@ public class AdminController {
             }
             imageService.updateImages(id, urls);
         }
-        ResponseEntity.ok().build();
+
+        return productService.updateProduct(id, productDTO);
+
     }
 
     @GetMapping(value = "/getAllProduct")
