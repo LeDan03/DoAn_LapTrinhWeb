@@ -50,7 +50,6 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderDTO orderDTO) {
         Order order = null;
-
         Payment payment = paymentRepository.findById(orderDTO.getPaymentId()).orElse(null);
         if(payment == null)
             return null;

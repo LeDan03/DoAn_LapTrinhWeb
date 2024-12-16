@@ -2,34 +2,23 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Order;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.*;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.DetailOrderResponse;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.ProductOrderResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@CrossOrigin("*")
+
 @Service
 public class AdminService {
-    @Autowired
-    AdminRepository adminRepository;
-
-    @Autowired
-    UserService userService;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -54,7 +43,7 @@ public class AdminService {
                     .id(user.getId())
                     .email(user.getEmail())
                     .fullName(user.getFullName())
-                    .role_id(user.getRole_id())
+                    .role_id(user.getRole().getId())
                     .status(user.isStatus())
                     .build();
         }).collect(Collectors.toList());
@@ -113,5 +102,45 @@ public class AdminService {
             return true;
         }
         return false;
+    }
+
+    public DetailOrderResponse getDetailOrder(long id) {
+        Order order = orderService.findById(id);
+        List<ProductOrder> productOrderList = order.getProductOrders();
+        User user = order.getCustomer();
+        Payment payment = order.getPayment();
+        List<ProductOrderResponse> productOrderResponses = new ArrayList<>();
+
+        int stt = 1;
+
+        for(ProductOrder productOrder : productOrderList) {
+            ProductOrderResponse productOrderResponse =  new ProductOrderResponse();
+            productOrderResponse = ProductOrderResponse.builder()
+                    .product_name(productOrder.getProduct().getName())
+                    .stt(stt)
+                    .quantity(productOrder.getQuantity())
+                    .product_price(productOrder.getProduct().getPrice())
+                    .total_price(productOrder.getProduct().getPrice()*productOrder.getQuantity())
+                    .build();
+            stt++;
+            productOrderResponses.add(productOrderResponse);
+        }
+
+        return putInfoInDetailOrderResponse(user,payment,order,productOrderResponses);
+    }
+
+    public DetailOrderResponse putInfoInDetailOrderResponse(User user, Payment payment, Order order, List<ProductOrderResponse> productOrderResponses) {
+        DetailOrderResponse detailOrderResponse = new DetailOrderResponse();
+
+        detailOrderResponse.setOrder_id(order.getId());
+        detailOrderResponse.setCustomer_name(user.getFullName());
+        detailOrderResponse.setPayment_method(payment.getName());
+        detailOrderResponse.setCreatedTime(order.getCreateTime());
+        detailOrderResponse.setAddress(order.getAddress());
+        detailOrderResponse.setStatus(order.getStatus());
+        detailOrderResponse.setProductOrders(productOrderResponses);
+        detailOrderResponse.setTotal(order.getTotal());
+
+        return detailOrderResponse;
     }
 }

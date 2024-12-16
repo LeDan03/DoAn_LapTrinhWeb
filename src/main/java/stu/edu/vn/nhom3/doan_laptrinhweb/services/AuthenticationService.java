@@ -2,12 +2,12 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.LoginUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Role;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.RoleRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
@@ -34,12 +34,17 @@ public class AuthenticationService {
         this.roleService = roleService;
         this.roleRepository = roleRepository;
     }
+
+    @Transactional
     public User signup(RegisterUserDTO input) {
+        Role role = roleRepository.findById(2).orElse(null);
+        if(role==null)
+            return null;
         User user = new User();
         user.setEmail(input.getEmail());
         user.setPasswordHash(passwordEncoder.encode(input.getPassword()));
         user.setStatus(true);
-        user.setRole_id(2);
+        user.setRole(role);
         user.setFullName(input.getFullName());
         return userRepository.save(user);
     }

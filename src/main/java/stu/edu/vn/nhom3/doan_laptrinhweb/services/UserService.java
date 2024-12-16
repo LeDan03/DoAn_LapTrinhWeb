@@ -1,6 +1,5 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,9 +20,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private RoleService   roleService;
     @Autowired
     PasswordEncoder passwordEncoder;
+
 
     public User getUserByEmail(String email)
     {

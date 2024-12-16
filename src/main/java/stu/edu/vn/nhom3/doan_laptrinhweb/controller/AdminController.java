@@ -1,24 +1,17 @@
 package stu.edu.vn.nhom3.doan_laptrinhweb.controller;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CategoryDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.RegisterUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
 
-import stu.edu.vn.nhom3.doan_laptrinhweb.repository.PaymentRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.UserRepository;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.DetailOrderResponse;
 import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
@@ -49,13 +42,7 @@ public class AdminController {
     ImageService imageService;
 
     @Autowired
-    private JwtService jwtService;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private OrderService orderService;
@@ -73,7 +60,7 @@ public class AdminController {
                 .fullName(user.getFullName())
                 .status(user.isStatus())
                 .email(user.getEmail())
-                .role_id(user.getRole_id())
+                .role_id(user.getRole().getId())
                 .build();
         return ResponseEntity.ok(registerUserDTO);
     }
@@ -88,12 +75,10 @@ public class AdminController {
             userRepository.save(user);
             if(!status)
                 return ResponseEntity.ok("User is disabled");
-            return ResponseEntity.ok("User is able");
+            return ResponseEntity.ok("User is active");
         }
         return ResponseEntity.ok("User is not found");
     }
-
-
 
     @GetMapping(value = "/getAllUser")
     public ResponseEntity<List<RegisterUserDTO>> getAllUser() {
@@ -138,40 +123,11 @@ public class AdminController {
     {
         return ResponseEntity.ok().body(adminService.getAllCategory());
     }
-//
-//    @PostMapping(value = "/addProduct")
-//    public ResponseEntity<Product> addProduct(@ModelAttribute ProductDTO productDTO, @RequestParam("images") List<MultipartFile> images) {
-//        if(!productService.isExistedProduct(productDTO.getName()))
-//        {
-//            Product product = new Product();
-//            product.setName(productDTO.getName());
-//            product.setDescription(productDTO.getDescription());
-//            product.setPrice(productDTO.getPrice());
-//            product.setCate_id(productDTO.getCategory_id());
-//            product.setTheme(productDTO.getTheme());
-//            product.setUnit(productDTO.getUnit());
-//            try {
-//                Product product1 = productService.addProduct(product);
-//                if(images != null && !images.isEmpty()){
-//                    for (MultipartFile image: images)
-//                    {
-//                        String fileUrl = cloudinaryService.uploadFile(image);
-//                        imageService.addNewImage(product1.getId(), fileUrl);
-//                    }
-//                }
-//                return ResponseEntity.ok(product1);
-//            } catch (Exception e) {
-//                return ResponseEntity.status(501).build();//Yêu cầu không thể được máy chủ thực hiện
-//            }
-//        }
-//        return ResponseEntity.badRequest().body(null);
-//    }
 
     @PostMapping(value = "/addProduct")
     public ResponseEntity<Product> addProduct(
             @ModelAttribute ProductDTO productDTO,
-            @RequestParam("images") List<MultipartFile> images) {
-
+            @RequestParam(value = "images", required = false) MultipartFile[] images) {
         if (!productService.isExistedProduct(productDTO.getName())) {
             Product product = new Product();
             product.setName(productDTO.getName());
@@ -183,25 +139,21 @@ public class AdminController {
 
             try {
                 Product savedProduct = productService.addProduct(product);
-
-                // Upload images nếu có
-                if (images != null && !images.isEmpty()) {
+                if (images != null && images.length > 0) {
                     for (MultipartFile image : images) {
                         String fileUrl = cloudinaryService.uploadFile(image);
                         imageService.addNewImage(savedProduct.getId(), fileUrl);
                     }
                 }
-
                 return ResponseEntity.ok(savedProduct);
-
             } catch (Exception e) {
-                // Trả về lỗi 501 nếu xử lý thất bại
                 return ResponseEntity.status(501).build();
             }
         }
-        // Trả về lỗi bad request nếu sản phẩm đã tồn tại
         return ResponseEntity.badRequest().body(null);
     }
+
+
     @DeleteMapping(value = "/deleteProduct/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable("id") int id) {
         List<Image> images = imageService.getImagesByProductId(id);
@@ -215,7 +167,6 @@ public class AdminController {
             return ResponseEntity.ok(result.getMessage());
         else
             return ResponseEntity.badRequest().body(result.getMessage());
-//        ResponseEntity.ok().build();
     }
 
     @PutMapping(value = "/updateProduct/{id}")
@@ -231,9 +182,7 @@ public class AdminController {
             }
             imageService.updateImages(id, urls);
         }
-
         return productService.updateProduct(id, productDTO);
-
     }
 
     @GetMapping(value = "/getAllProduct")
@@ -286,5 +235,18 @@ public class AdminController {
         order.setStatus(status);
         orderService.save(order);
         return ResponseEntity.ok().body("Update status successfully, new status: " + order.getStatus()+", old status: " + oldStatus);
+    }
+
+    @GetMapping(value = "/getAllOrders")
+    public ResponseEntity<List<Order>> getAllOrderṣ̣̣̣()
+    {
+        List<Order> orders = orderService.findAll();
+        return ResponseEntity.ok().body(orders);
+    }
+
+    @GetMapping(value = "/getDetailOrder/{order_id}")
+    public ResponseEntity<DetailOrderResponse> getDetailOrder(@PathVariable("order_id") long order_id)
+    {
+        return ResponseEntity.ok().body(adminService.getDetailOrder(order_id));
     }
 }

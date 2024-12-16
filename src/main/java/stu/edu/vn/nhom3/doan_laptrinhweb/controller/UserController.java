@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CartProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.OrderDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.CartProduct;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.Order;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.ProductOrder;
-import stu.edu.vn.nhom3.doan_laptrinhweb.model.User;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
 import java.util.List;
@@ -40,6 +37,12 @@ public class UserController {
 
     @Autowired
     private ProductOrderSevice productOrderSevice;
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private CategoryService categoryService;
 
     @PostMapping(value = "/loadCart")
     public List<CartProduct> getUserCartProducts() {
@@ -124,17 +127,35 @@ public class UserController {
     }
 
     @PostMapping(value = "/createNewOrder")
-    public ResponseEntity<Order> createNewOrder(@RequestBody OrderDTO orderDTO)
+    public ResponseEntity<Object> createNewOrder(@RequestBody OrderDTO orderDTO)
     {
         Order order = new Order();
         order = orderService.createOrder(orderDTO);
+        if (order == null)
+            return ResponseEntity.badRequest().body("Chưa có payment");
         Order result = orderService.save(order);
-
         for (ProductOrder productOrder : order.getProductOrders()) {
             productOrder.setOrderId(result.getId());
         }
         productOrderSevice.saveAll(order.getProductOrders());
-
         return ResponseEntity.ok().body(result);
+    }
+
+    @GetMapping(value = "/getAllProducts")
+    public ResponseEntity<List<Product>> getAllProducts()
+    {
+        return ResponseEntity.ok().body(productService.findAll());
+    }
+
+    @GetMapping(value = "/getAllCategories")
+    public ResponseEntity<List<Category>> getAllCategories()
+    {
+        return ResponseEntity.ok().body(categoryService.findAll());
+    }
+
+    @GetMapping(value = "/getProduct/{product_id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("product_id") int product_id)
+    {
+        return ResponseEntity.ok().body(productService.findById(product_id));
     }
 }

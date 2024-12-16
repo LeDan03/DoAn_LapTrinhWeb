@@ -2,6 +2,7 @@ package stu.edu.vn.nhom3.doan_laptrinhweb.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Role;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.RoleRepository;
 
@@ -13,6 +14,7 @@ public class RoleService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Transactional
     public void addDefaultRole(){
         List<Role> roles = roleRepository.findAll();
         if(roles.isEmpty()) {
@@ -27,10 +29,5 @@ public class RoleService {
     public List<Role> getAllRole()
     {
         return roleRepository.findAll();
-    }
-    public int getAdminRole()
-    {
-        Role roleAdmin = roleRepository.findByName("ADMIN");
-        return roleAdmin.getId();
     }
 }
