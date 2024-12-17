@@ -8,9 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CartProductDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.OrderDTO;
-import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.dto.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
 import stu.edu.vn.nhom3.doan_laptrinhweb.response.ProductResponse;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
@@ -45,6 +43,9 @@ public class UserController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private ImageService imageService;
 
     @PostMapping(value = "/loadCart")
     public List<CartProduct> getUserCartProducts() {
@@ -168,14 +169,41 @@ public class UserController {
     }
 
     @GetMapping(value = "/getAllCategories")
-    public ResponseEntity<List<Category>> getAllCategories()
+    public ResponseEntity<List<CategoryDTO>> getAllCategories()
     {
-        return ResponseEntity.ok().body(categoryService.findAll());
+        List<Category> categories = categoryService.findAll();
+        List<CategoryDTO> categoryDTOs = new ArrayList<>();
+        for (Category category : categories) {
+            CategoryDTO categoryDTO = new CategoryDTO();
+            categoryDTO = CategoryDTO.builder()
+                    .id(category.getId())
+                    .name(category.getName())
+                    .code(category.getCode())
+                    .build();
+            categoryDTOs.add(categoryDTO);
+        }
+        return ResponseEntity.ok().body(categoryDTOs);
     }
 
     @GetMapping(value = "/getProduct/{product_id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("product_id") int product_id)
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable("product_id") int product_id)
     {
-        return ResponseEntity.ok().body(productService.findById(product_id));
+        Product product = productService.findById(product_id);
+        ProductDTO productDTO = new ProductDTO();
+
+        List<String> imgUrls = imageService.getProductImagesLink(product.getImages());
+
+        productDTO = ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .category_id(product.getCategory().getId())
+                .unit(product.getUnit())
+                .theme(product.getTheme())
+                .description(product.getDescription())
+                .listImage(imgUrls)
+                .build();
+
+        return ResponseEntity.ok().body(productDTO);
     }
 }

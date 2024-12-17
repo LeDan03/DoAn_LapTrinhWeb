@@ -41,7 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/user/getAllProducts").permitAll()
                         .requestMatchers("/user/getAllCategories").permitAll()
-                        .requestMatchers("/user/getProduct/").permitAll()
+                        .requestMatchers("/user/getProduct/**").permitAll()
                         .anyRequest().authenticated()
         )
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
