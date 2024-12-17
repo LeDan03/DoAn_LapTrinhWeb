@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.ProductDTO;
+import stu.edu.vn.nhom3.doan_laptrinhweb.model.Category;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.Product;
 import stu.edu.vn.nhom3.doan_laptrinhweb.repository.ProductRepository;
 import stu.edu.vn.nhom3.doan_laptrinhweb.response.Response;
@@ -17,6 +18,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryService categoryService;
 
     public List<Product> findAll() {
         return productRepository.findAll();
@@ -62,13 +66,12 @@ public class ProductService {
             }
     }
     public Response updateProduct(int id, ProductDTO productDTO) {
-        Logger logger = Logger.getLogger(this.getClass().getName());
-        logger.info("DA VAO UPDATE PRODUCT SERVICE ");
+        Category category = categoryService.findById(productDTO.getCategory_id());
         Product product = findById(id);
         product.setName(productDTO.getName());
         product.setTheme(productDTO.getTheme());
         product.setUnit(productDTO.getUnit());
-        product.setCate_id(productDTO.getCategory_id());
+        product.setCategory(category);
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
         try{

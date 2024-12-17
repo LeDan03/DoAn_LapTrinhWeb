@@ -129,11 +129,12 @@ public class AdminController {
             @ModelAttribute ProductDTO productDTO,
             @RequestParam(value = "images", required = false) MultipartFile[] images) {
         if (!productService.isExistedProduct(productDTO.getName())) {
+            Category category = categoryService.findById(productDTO.getCategory_id());
             Product product = new Product();
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
-            product.setCate_id(productDTO.getCategory_id());
+            product.setCategory(category);
             product.setTheme(productDTO.getTheme());
             product.setUnit(productDTO.getUnit());
 
@@ -191,6 +192,7 @@ public class AdminController {
         return ResponseEntity.ok().body(adminService.getAllProduct());
     }
 
+    //code chưa chuẩn
     @GetMapping("/findProduct/{product_id}")
     public ResponseEntity<ProductDTO> findProductById(@PathVariable("product_id") int id) {
 
@@ -198,7 +200,7 @@ public class AdminController {
         if(product!=null)
         {
             List<Image> product_images = imageService.getImagesByProductId(id);
-            Category category = categoryService.findById(product.getCate_id());
+            Category category = categoryService.findById(product.getCategory().getId());
 
             ProductDTO productDTO = new ProductDTO();
             productDTO.setName(product.getName());
@@ -207,7 +209,7 @@ public class AdminController {
             productDTO.setUnit(product.getUnit());
             productDTO.setTheme(product.getTheme());
             productDTO.setId(product.getId());
-            productDTO.setCategory_id(product.getCate_id());
+            productDTO.setCategory_id(product.getCategory().getId());
             productDTO.setCategory_name(category.getName());
             productDTO.setListImage(imageService.getProductImagesLink(product_images));
             return ResponseEntity.ok(productDTO);

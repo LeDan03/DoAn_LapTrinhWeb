@@ -12,8 +12,10 @@ import stu.edu.vn.nhom3.doan_laptrinhweb.dto.CartProductDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.OrderDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.dto.UpdateUserDTO;
 import stu.edu.vn.nhom3.doan_laptrinhweb.model.*;
+import stu.edu.vn.nhom3.doan_laptrinhweb.response.ProductResponse;
 import stu.edu.vn.nhom3.doan_laptrinhweb.services.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin("*")
@@ -142,9 +144,27 @@ public class UserController {
     }
 
     @GetMapping(value = "/getAllProducts")
-    public ResponseEntity<List<Product>> getAllProducts()
+    public ResponseEntity<List<ProductResponse>> getAllProducts()
     {
-        return ResponseEntity.ok().body(productService.findAll());
+        List<Product> products = productService.findAll();
+        List<ProductResponse> productResponses = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductResponse productResponse = new ProductResponse();
+            productResponse = ProductResponse.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .price(product.getPrice())
+                    .cate_id(product.getCategory().getId())
+                    .unit(product.getUnit())
+                    .theme(product.getTheme())
+                    .description(product.getDescription())
+                    .images(product.getImages())
+                    .build();
+            productResponses.add(productResponse);
+        }
+
+        return ResponseEntity.ok().body(productResponses);
     }
 
     @GetMapping(value = "/getAllCategories")

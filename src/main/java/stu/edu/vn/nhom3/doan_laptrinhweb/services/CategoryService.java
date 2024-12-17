@@ -18,9 +18,6 @@ import java.util.logging.Logger;
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
-    private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
 

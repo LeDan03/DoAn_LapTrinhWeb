@@ -81,7 +81,7 @@ public class AdminService {
                     .price(product.getPrice())
                     .theme(product.getTheme())
                     .unit(product.getUnit())
-                    .category_id(product.getCate_id())
+                    .category_id(product.getCategory().getId())
                     .category_name(product.getCategory().getName())
                     .description(product.getDescription())
                     .listImage(images)

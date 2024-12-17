@@ -34,16 +34,14 @@ public class Product {
 
     @Column
     private String unit;
-
-    @Column
-    private int cate_id;
+    //cate-id
 
     @ManyToOne
     @JsonBackReference("category-product")
-    @JoinColumn(name = "cate_id",insertable = false, updatable = false)
+    @JoinColumn(name = "cate_id")
     private Category category;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",fetch = FetchType.EAGER)
     @JsonManagedReference("image-product")
     private List<Image> images;
 
